@@ -1,78 +1,89 @@
+import random
 import tkinter as tk
-from tkinter import messagebox
-from game_logic import CharList, word_list, secret_word
-
-print(secret_word)
-char_not_present =[]
+from game_logic import word_list
 
 
-def on_key(event, index):
-    value = guess[index].get()
+# variables
+green = "#4bf80f"
+font = ("comic sense", 60)
+letters =[]
+word = "GRADE"
+btn_index = 0
+count = 0
+guess =""
+char_not_present=[]
+winner = False
 
-    # Only keep first character and make it uppercase
-    if len(value) > 1:
-        guess[index].delete(1, tk.END)
+# game main loop
 
-    if  value.isdigit() or value in char_not_present:
-        guess[index].delete(0, tk.END)
-    else:
-        guess[index].delete(0, tk.END)
-        guess[index].insert(0, value.upper())
-
-        # Move to next entry automatically
-        if index < len(guess) - 1:
-            guess[index + 1].focus()
-    
-
-def on_submit():
-    word = "".join(e.get() for e in guess)
-    if word.lower() not in word_list:
-        messagebox.showerror("Invalid Word", "Please Enter a Valid Word")
-    
-    for i in range(len(guess)):
-        if guess[i].get().lower() in secret_word:
-            guess[i].config(bg= "yellow")
-        else:
-            guess[i].config(bg="gray")
-            char_not_present.append(guess[i].get())
-        if guess[i].get().lower() == secret_word[i]:
-                guess[i].config(bg = "lightgreen")
-    
-    new_guess()
-
-
-
-
-    
-# setup the main window
 root = tk.Tk()
-root.title( "Word Guess Game")
-root.geometry("800x800")
-
-# Setup the labels
-Titile_label = tk.Label(root, text="Word Guess Game", font =("Arial", 60), justify="center", foreground="darkblue")
-Titile_label.pack(padx=20, pady=20)
-
-instr_label = tk.Label(root, text=" Make a guess of 5 letters word", font =("Arial",30))
-instr_label.pack(padx=20 ,pady=20)
-
-# Setup the entry feilds
-entry_frame = tk.Frame(root)
-entry_frame.pack()
-guess = []
-for i in range(5):
-         e=tk.Entry(entry_frame, width = 3 , font = ("Arial", 25), justify="center")
-         e.bind("<KeyRelease>", lambda event, idx=i: on_key(event, idx))
-         e.grid(row=0, column=i)
-         guess.append(e)
-  
+root.title("Wordle")
+root.geometry("600x900")
 
 
-submit_button = tk.Button(entry_frame, text="Submit", font=("Arial", 25),bg="lightblue", command = on_submit)
-submit_button.grid(row = 0, column = 6) 
+# new game 
+def new_game():
+    global btn_index, winner, count , char_not_present
+    layout()
+    
+    root.bind("<Key>"  , key_press)
+    
+
+menu_bar = tk.Menu(root)
+my_menu = tk.Menu(menu_bar)
+my_menu.add_command(label="New Game", command = new_game)
+root.config(menu = my_menu)
+label = tk.Label(root , text= "Wordle",  font = ("arial", 30))
+label.pack(padx=10, pady= 10)
+frame = tk.Frame(root)
+frame.pack()
+label2 = tk.Label(root , text ="Good Job...\n  You guessed it!", bg="yellow", font = ("arial", 50))
+
+# word check
+def word_check(guess):
+    global btn_index , winner
+    btn_index -= 5
+    for i in range(5):
+        if letters[btn_index + i].cget("text")== word[i]:
+            letters[btn_index + i].config(bg=green)
+            
+        elif letters[btn_index + i].cget("text") in word:
+            letters[btn_index + i].config(bg="yellow")
+        else :
+            letters[btn_index + i].config(bg="gray")
+            char_not_present.append(letters[btn_index + i].cget("text"))
+                                    
+    if guess == word:
+         winner = True
+         label2.pack()
+    
+    btn_index += 5           
+
+# key event
+def key_press(event):
+    global btn_index, count, guess , winner
+    if winner == False:
+        letter = event.char.upper()
+        if letter not in char_not_present and letter.isalpha():
+            letters[btn_index].config(text= letter)
+            guess += letter
+            btn_index += 1
+            count += 1
+            if count % 5 == 0:
+                word_check(guess)
+                guess =""
+
+# layout 
+def layout():
+    for row in range(6):
+        for col in range(5):
+            btn = tk.Button(frame, text = "" ,width=1, font = font, bg = "white")
+            btn.grid(row = row, column = col)
+            letters.append(btn)
 
 
+    
 
-
+new_game()
 
 root.mainloop()
