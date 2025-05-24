@@ -1,5 +1,3 @@
-import random
-
 word_list=[]
 
 with open("word_list.txt", "r") as f:
