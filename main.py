@@ -1,6 +1,6 @@
 import random
 import tkinter as tk
-from game_logic import word_list
+from renerate_word_list import word_list
 
 
 # variables
@@ -19,16 +19,21 @@ winner = False
 root = tk.Tk()
 root.title("Wordle")
 root.geometry("600x10000")
-root.configure(bg= "blue")
-label = tk.Label(root , text= "WORDLE", bg= "blue", foreground= "white", font = ("sanserif", 70))
+root.configure(bg= "darkblue")
+label = tk.Label(root , text= "WORDLE", bg= "darkblue", foreground= "white", font = ("sanserif", 70))
 label.pack(padx=10, pady= 10)
 frame = tk.Frame(root)
 frame.pack()
 label2 = tk.Label(root , text ="Good Job...\n  You guessed it!", bg="yellow", font = ("arial", 50))
-
+label3= tk.Label( font = ("arial", 30), foreground= "yellow", text="Not In word list")
 # word check
 def word_check(guess):
-    global btn_index , winner
+    global btn_index , winner 
+    if guess.lower() not in word_list:
+        label3.pack()
+        btn_index -= 5
+        return
+
     btn_index -= 5
     for i in range(5):
         if letters[btn_index + i].cget("text")== word[i]:
@@ -47,6 +52,7 @@ def word_check(guess):
                                     
     if guess == word:
          winner = True
+         
          label2.pack()
     
     btn_index += 5           
@@ -56,7 +62,7 @@ def key_press(event):
     global btn_index, count, guess , winner
     if winner:
         return
-    
+    label3.forget()
     if event.keysym == "BackSpace":
         if btn_index> 0 and  (btn_index ) % 5 > 0:
             btn_index -= 1
